@@ -1,0 +1,103 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../cork-popup-button/cork-popup-button.html">
+
+<dom-module id="cork-select">
+  <template>
+    <style>
+      :host {
+        display: inline-block;
+      }
+
+      .option {
+        cursor: pointer;
+        padding: 13px;
+        border-bottom: 1px solid var(--medium-background-color);
+      }
+      
+      .option:hover {
+        background-color: var(--light-background-color);
+        color: var(--default-primary-color);
+      }
+
+      cork-popup-button {
+        display: block;
+      }
+    </style>
+
+    <cork-popup-button icon="[[icon]]" label="[[label]]" id="btn">
+      <template is="dom-repeat" items="[[options]]">
+        <div class="option" on-click="_onOptionClick" index$="[[index]]">
+          <iron-icon hidden$="[[!item.icon]]" icon="[[item.icon]]"></iron-icon>
+          <span>[[item.label]]</span>
+        </div>
+      </template>
+    </cork-popup-button>
+
+  </template>
+
+  <script>
+
+    class CorkSelect extends Polymer.Element {
+      static get is() { return 'cork-select'; }
+
+      static get properties() {
+        return {
+          options: {
+            type: Array,
+            value: function() {
+              return [];
+            }
+          },
+          label : {
+            type : String,
+            value : ''
+          },
+          value : {
+            type : String,
+            value : '',
+            notify : true,
+            observer : '_onValueChange'
+          },
+          icon : {
+            type : String,
+            value : ''
+          }
+        };
+      }
+
+      _onValueChange() {
+        var item;
+        for( var i = 0; i < this.options.length; i++ ) {
+          if( this.options[i].value === this.value ) {
+            this.label = this.options[i].label || this.value;
+            this.icon = this.options[i].icon || '';
+            return;
+          }
+        }
+      }
+
+      _onOptionClick(e) {
+        this.$.btn.toggle();
+        
+        var selected = this.options[parseInt(e.currentTarget.getAttribute('index'))];
+        this.icon = selected.icon || '';
+        this.value = selected.value || '';
+        this.label = selected.label || this.value;
+
+        var payload = {
+          bubbles: true, 
+          composed: true,
+          details : {
+            value : this.value,
+            label : this.label,
+            icon : this.icon
+          }
+        }
+
+        this.dispatchEvent(new CustomEvent('change', payload));
+      }
+    }
+
+    window.customElements.define(CorkSelect.is, CorkSelect);
+  </script>
+</dom-module>
