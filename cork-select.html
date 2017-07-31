@@ -12,6 +12,8 @@
         cursor: pointer;
         padding: 13px;
         border-bottom: 1px solid var(--medium-background-color);
+        display: flex;
+        align-items: center;
       }
       
       .option:hover {
@@ -19,18 +21,24 @@
         color: var(--default-primary-color);
       }
 
+      iron-icon {
+        margin-right: 5px;
+      }
+
       cork-popup-button {
         display: block;
       }
     </style>
 
-    <cork-popup-button icon="[[icon]]" label="[[label]]" id="btn">
-      <template is="dom-repeat" items="[[options]]">
-        <div class="option" on-click="_onOptionClick" index$="[[index]]">
-          <iron-icon hidden$="[[!item.icon]]" icon="[[item.icon]]"></iron-icon>
-          <span>[[item.label]]</span>
-        </div>
-      </template>
+    <cork-popup-button open="{{active}}" icon="[[icon]]" label="[[label]]" id="btn">
+      <div>
+        <template is="dom-repeat" items="[[_options]]">
+          <div class="option" on-click="_onOptionClick" index$="[[index]]">
+            <iron-icon hidden$="[[!item.icon]]" icon="[[item.icon]]"></iron-icon>
+            <span>[[item.label]]</span>
+          </div>
+        </template>
+      </div>
     </cork-popup-button>
 
   </template>
@@ -42,7 +50,19 @@
 
       static get properties() {
         return {
+          active : {
+            type : boolean,
+            value : false,
+            notify : true
+          },
           options: {
+            type: Array,
+            value: function() {
+              return [];
+            },
+            observer: '_onOptionsChange'
+          },
+          _options: {
             type: Array,
             value: function() {
               return [];
@@ -63,6 +83,16 @@
             value : ''
           }
         };
+      }
+
+      _onOptionsChange() {
+        this._options = this.options.map((option) => {
+          return {
+            label : option.label || option.value,
+            value : option.value,
+            icon : option.icon || ''
+          }
+        })
       }
 
       _onValueChange() {
