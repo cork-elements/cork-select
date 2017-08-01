@@ -16,9 +16,10 @@
         align-items: center;
       }
       
-      .option:hover {
+      .option:hover, .option:focus {
         background-color: var(--light-background-color);
         color: var(--default-primary-color);
+        outline: none;
       }
 
       iron-icon {
@@ -28,12 +29,23 @@
       cork-popup-button {
         display: block;
       }
+
+      #optionsRoot {
+        max-height: 250px;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
     </style>
 
     <cork-popup-button open="{{active}}" icon="[[icon]]" label="[[label]]" id="btn">
-      <div>
+      <div id="optionsRoot">
         <template is="dom-repeat" items="[[_options]]">
-          <div class="option" on-click="_onOptionClick" index$="[[index]]">
+          <div 
+            class="option" 
+            on-click="_onOptionClick" 
+            on-keydown="_onKeyDown"
+            tabindex="1" 
+            index$="[[index]]">
             <iron-icon hidden$="[[!item.icon]]" icon="[[item.icon]]"></iron-icon>
             <span>[[item.label]]</span>
           </div>
@@ -51,9 +63,10 @@
       static get properties() {
         return {
           active : {
-            type : boolean,
+            type : Boolean,
             value : false,
-            notify : true
+            notify : true,
+            observer : '_onActive'
           },
           options: {
             type: Array,
@@ -81,8 +94,44 @@
           icon : {
             type : String,
             value : ''
+          },
+          focusIndex : {
+            type : Number,
+            value : 0
           }
         };
+      }
+
+      _onActive() {
+        if( !this.active ) {
+          this.$.btn.focus();
+        } else {
+          this.focusIndex = 0;
+          this._focusOption();
+        }
+      }
+
+      _focusOption() {
+        var optionEles = this.$.optionsRoot.querySelectorAll('.option');
+        if( optionEles && optionEles.length > this.focusIndex ) {
+          optionEles[this.focusIndex].focus();
+        }
+      }
+
+      _focusUp() {
+        this.focusIndex--;
+        if( this.focusIndex < 0 ) {
+          this.focusIndex = this.options.length - 1;
+        }
+        this._focusOption();
+      }
+
+      _focusDown() {
+        this.focusIndex++;
+        if( this.focusIndex == this.options.length ) {
+          this.focusIndex = 0;
+        }
+        this._focusOption();
       }
 
       _onOptionsChange() {
@@ -125,6 +174,25 @@
         }
 
         this.dispatchEvent(new CustomEvent('change', payload));
+      }
+
+      _onKeyDown(e) {
+        // enter
+        if( e.which === 13 ) {
+          this._onOptionClick(e);
+        // up arrow
+        } else if( e.which === 38 ) {
+          this._focusUp();
+        // tab or down arrow
+        } else if( e.which === 40 || e.which === 9) {
+          this._focusDown();
+        // escape
+        } else if( e.which === 27 ) {
+          this.active = false;
+        }
+        
+        e.stopPropagation();
+        e.preventDefault();
       }
     }
 
