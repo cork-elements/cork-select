@@ -102,10 +102,33 @@
         };
       }
 
+      ready() {
+        super.ready();
+        this._resize = this._resize.bind(this);
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        this._resize();
+        window.addEventListener('resize', this._resize);
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener('resize', this._resize);
+      }
+
+      _resize() {
+        // make sure drop down is at least width of input
+        this.$.btn.$.popup.style.minWidth = this.$.btn.offsetWidth+'px';
+      }
+
       _onActive() {
         if( !this.active ) {
           this.$.btn.focus();
         } else {
+          this._resize();
+
           var i;
           for( i = this.options.length-1; i >= 0; i-- ) {
             if( this.value === this.options[i].value ) {
