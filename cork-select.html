@@ -106,7 +106,14 @@
         if( !this.active ) {
           this.$.btn.focus();
         } else {
-          this.focusIndex = 0;
+          var i;
+          for( i = this.options.length-1; i >= 0; i-- ) {
+            if( this.value === this.options[i].value ) {
+              break;
+            }
+          }
+          this.focusIndex = i;
+
           this._focusOption();
         }
       }
