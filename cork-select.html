@@ -45,6 +45,8 @@
             class="option" 
             on-click="_onOptionClick" 
             on-keydown="_onKeyDown"
+            on-keyup="_onKeyUp"
+            on-keypress="_onKeyPress"
             tabindex="1" 
             index$="[[index]]">
             <iron-icon hidden$="[[!item.icon]]" icon="[[item.icon]]"></iron-icon>
@@ -208,6 +210,16 @@
       }
 
       _onKeyDown(e) {
+        this._prevent(e);
+      }
+
+      _onKeyPress(e) {
+        this._prevent(e);
+      }
+
+      _onKeyUp(e) {
+        if( !this.active ) return;
+
         // enter
         if( e.which === 13 ) {
           this._onOptionClick(e);
@@ -222,6 +234,10 @@
           this.active = false;
         }
         
+        this._prevent(e);
+      }
+
+      _prevent(e) {
         e.stopPropagation();
         e.preventDefault();
       }
