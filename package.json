@@ -1,0 +1,23 @@
+{
+  "name": "@ucd-lib/cork-select",
+  "version": "1.0.0",
+  "description": "Select box input",
+  "main": "cork-select.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cork-elements/cork-select.git"
+  },
+  "author": "jrmerz@ucdavis.edu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cork-elements/cork-select/issues"
+  },
+  "homepage": "https://github.com/cork-elements/cork-select#readme",
+  "dependencies": {
+    "@polymer/polymer": "^3.0.2",
+    "@ucd-lib/cork-popup-button": "^1.0.0"
+  }
+}

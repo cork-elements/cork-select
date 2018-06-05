@@ -1,248 +1,52 @@
-<link rel="import" href="../polymer/polymer-element.html">
-<link rel="import" href="../cork-popup-button/cork-popup-button.html">
+<style>
+  :host {
+    display: inline-block;
+  }
 
-<dom-module id="cork-select">
-  <template>
-    <style>
-      :host {
-        display: inline-block;
-      }
+  .option {
+    cursor: pointer;
+    padding: 13px;
+    border-bottom: 1px solid var(--medium-background-color);
+    display: flex;
+    align-items: center;
+    font-size: var(--cork-font-size, 16px);
+  }
+  
+  .option:hover, .option:focus {
+    background-color: var(--light-background-color);
+    color: var(--default-primary-color);
+    outline: none;
+  }
 
-      .option {
-        cursor: pointer;
-        padding: 13px;
-        border-bottom: 1px solid var(--medium-background-color);
-        display: flex;
-        align-items: center;
-        font-size: var(--cork-font-size, 16px);
-      }
-      
-      .option:hover, .option:focus {
-        background-color: var(--light-background-color);
-        color: var(--default-primary-color);
-        outline: none;
-      }
+  iron-icon {
+    margin-right: 5px;
+  }
 
-      iron-icon {
-        margin-right: 5px;
-      }
+  cork-popup-button {
+    display: block;
+  }
 
-      cork-popup-button {
-        display: block;
-      }
+  #optionsRoot {
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+</style>
 
-      #optionsRoot {
-        max-height: 250px;
-        overflow-y: auto;
-        overflow-x: hidden;
-      }
-    </style>
-
-    <cork-popup-button open="{{active}}" icon="[[icon]]" label="[[label]]" id="btn">
-      <div id="optionsRoot">
-        <template is="dom-repeat" items="[[_options]]">
-          <div 
-            class="option" 
-            on-click="_onOptionClick" 
-            on-keydown="_onKeyDown"
-            on-keyup="_onKeyUp"
-            on-keypress="_onKeyPress"
-            tabindex="1" 
-            index$="[[index]]">
-            <iron-icon hidden$="[[!item.icon]]" icon="[[item.icon]]"></iron-icon>
-            <span>[[item.label]]</span>
-          </div>
-        </template>
+<cork-popup-button open="{{active}}" icon="[[icon]]" label="[[label]]" id="btn">
+  <div id="optionsRoot">
+    <template is="dom-repeat" items="[[_options]]">
+      <div 
+        class="option" 
+        on-click="_onOptionClick" 
+        on-keydown="_onKeyDown"
+        on-keyup="_onKeyUp"
+        on-keypress="_onKeyPress"
+        tabindex="1" 
+        index$="[[index]]">
+        <iron-icon hidden$="[[!item.icon]]" icon="[[item.icon]]"></iron-icon>
+        <span>[[item.label]]</span>
       </div>
-    </cork-popup-button>
-
-  </template>
-
-  <script>
-
-    class CorkSelect extends Polymer.Element {
-      static get is() { return 'cork-select'; }
-
-      static get properties() {
-        return {
-          active : {
-            type : Boolean,
-            value : false,
-            notify : true,
-            observer : '_onActive'
-          },
-          options: {
-            type: Array,
-            value: function() {
-              return [];
-            },
-            observer: '_onOptionsChange'
-          },
-          _options: {
-            type: Array,
-            value: function() {
-              return [];
-            }
-          },
-          label : {
-            type : String,
-            value : ''
-          },
-          value : {
-            type : String,
-            value : '',
-            notify : true,
-            observer : '_onValueChange'
-          },
-          icon : {
-            type : String,
-            value : ''
-          },
-          focusIndex : {
-            type : Number,
-            value : 0
-          }
-        };
-      }
-
-      ready() {
-        super.ready();
-        this._resize = this._resize.bind(this);
-      }
-
-      connectedCallback() {
-        super.connectedCallback();
-        this._resize();
-        window.addEventListener('resize', this._resize);
-      }
-
-      disconnectedCallback() {
-        super.disconnectedCallback();
-        window.removeEventListener('resize', this._resize);
-      }
-
-      _resize() {
-        // make sure drop down is at least width of input
-        this.$.btn.$.popup.style.minWidth = this.$.btn.offsetWidth+'px';
-      }
-
-      _onActive() {
-        if( !this.active ) {
-          this.$.btn.focus();
-        } else {
-          this._resize();
-
-          var i;
-          for( i = this.options.length-1; i >= 0; i-- ) {
-            if( this.value === this.options[i].value ) {
-              break;
-            }
-          }
-          this.focusIndex = i;
-
-          this._focusOption();
-        }
-      }
-
-      _focusOption() {
-        var optionEles = this.$.optionsRoot.querySelectorAll('.option');
-        if( optionEles && optionEles.length > this.focusIndex ) {
-          optionEles[this.focusIndex].focus();
-        }
-      }
-
-      _focusUp() {
-        this.focusIndex--;
-        if( this.focusIndex < 0 ) {
-          this.focusIndex = this.options.length - 1;
-        }
-        this._focusOption();
-      }
-
-      _focusDown() {
-        this.focusIndex++;
-        if( this.focusIndex == this.options.length ) {
-          this.focusIndex = 0;
-        }
-        this._focusOption();
-      }
-
-      _onOptionsChange() {
-        this._options = this.options.map((option) => {
-          return {
-            label : option.label || option.value,
-            value : option.value,
-            icon : option.icon || ''
-          }
-        })
-      }
-
-      _onValueChange() {
-        var item;
-        for( var i = 0; i < this.options.length; i++ ) {
-          if( this.options[i].value === this.value ) {
-            this.label = this.options[i].label || this.value;
-            this.icon = this.options[i].icon || '';
-            return;
-          }
-        }
-      }
-
-      _onOptionClick(e) {
-        this.$.btn.toggle();
-        
-        var selected = this.options[parseInt(e.currentTarget.getAttribute('index'))];
-        this.icon = selected.icon || '';
-        this.value = selected.value || '';
-        this.label = selected.label || this.value;
-
-        var payload = {
-          bubbles: true, 
-          composed: true,
-          details : {
-            value : this.value,
-            label : this.label,
-            icon : this.icon
-          }
-        }
-
-        this.dispatchEvent(new CustomEvent('change', payload));
-      }
-
-      _onKeyDown(e) {
-        this._prevent(e);
-      }
-
-      _onKeyPress(e) {
-        this._prevent(e);
-      }
-
-      _onKeyUp(e) {
-        if( !this.active ) return;
-
-        // enter
-        if( e.which === 13 ) {
-          this._onOptionClick(e);
-        // up arrow
-        } else if( e.which === 38 ) {
-          this._focusUp();
-        // tab or down arrow
-        } else if( e.which === 40 || e.which === 9) {
-          this._focusDown();
-        // escape
-        } else if( e.which === 27 ) {
-          this.active = false;
-        }
-        
-        this._prevent(e);
-      }
-
-      _prevent(e) {
-        e.stopPropagation();
-        e.preventDefault();
-      }
-    }
-
-    window.customElements.define(CorkSelect.is, CorkSelect);
-  </script>
-</dom-module>
+    </template>
+  </div>
+</cork-popup-button>
