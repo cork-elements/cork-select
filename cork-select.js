@@ -1,4 +1,4 @@
-import "@polymer/polymer"
+import {PolymerElement, html} from "@polymer/polymer"
 import template from "./cork-select.html"
 
 import "@ucd-lib/cork-popup-button"

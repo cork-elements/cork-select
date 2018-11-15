@@ -1,6 +1,6 @@
 {
   "name": "@ucd-lib/cork-select",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Select box input",
   "main": "cork-select.js",
   "scripts": {
